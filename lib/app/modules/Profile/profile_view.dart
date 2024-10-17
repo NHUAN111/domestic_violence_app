@@ -40,18 +40,34 @@ class ProfileView extends StatelessWidget {
               endIndent: 5,
             ),
             ProfileCardComponent(
-              icon: Icon(Icons.account_box_rounded),
+              icon: Icon(
+                Icons.account_box_rounded,
+                color: ColorData.colorIcon,
+              ),
               onPress: () {
                 // Action for Personal Page
               },
               nameFuction: 'Personal Page',
             ),
             ProfileCardComponent(
-              icon: Icon(Icons.edit),
+              icon: Icon(
+                Icons.edit,
+                color: ColorData.colorIcon,
+              ),
               onPress: () {
                 Get.toNamed(Routes.settingPhone);
               },
-              nameFuction: 'Customize calls',
+              nameFuction: 'Customize Calls',
+            ),
+            ProfileCardComponent(
+              icon: Icon(
+                Icons.favorite,
+                color: ColorData.colorSos,
+              ),
+              onPress: () {
+                Get.toNamed(Routes.settingPhone);
+              },
+              nameFuction: 'Your Favorites',
             ),
             const Divider(
               color: Colors.grey,
@@ -62,7 +78,10 @@ class ProfileView extends StatelessWidget {
             ),
             const Spacer(),
             ProfileCardComponent(
-              icon: Icon(Icons.logout_rounded),
+              icon: Icon(
+                Icons.logout_rounded,
+                color: ColorData.colorIcon,
+              ),
               onPress: () {
                 // Action for Log Out
               },
