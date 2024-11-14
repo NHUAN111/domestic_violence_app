@@ -24,7 +24,7 @@ class _ProfileCardComponentState extends State<ProfileCardComponent> {
       padding: const EdgeInsets.only(bottom: 5),
       child: GestureDetector(
         onTap: () {
-          widget.onPress(); // Sửa chỗ này
+          widget.onPress(); 
         },
         child: Card(
           elevation: 4,

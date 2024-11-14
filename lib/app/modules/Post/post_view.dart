@@ -2,43 +2,59 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project_domestic_violence/app/components/ButtonComponent.dart';
-import 'package:project_domestic_violence/app/components/StoryComponent.dart';
+import 'package:project_domestic_violence/app/components/button_component.dart';
+import 'package:project_domestic_violence/app/components/story_component.dart';
 import 'package:project_domestic_violence/app/data/provider/appwritePost.dart';
-import 'package:project_domestic_violence/app/data/repository/blogRepository.dart';
-import 'package:project_domestic_violence/app/models/blog.dart';
-import 'package:project_domestic_violence/app/modules/Blog/blog_controller.dart';
-import 'package:project_domestic_violence/app/modules/Blog/blog_detail_view.dart';
+import 'package:project_domestic_violence/app/data/repository/postRepository.dart';
+import 'package:project_domestic_violence/app/models/post.dart';
+import 'package:project_domestic_violence/app/modules/Post/post_controller.dart';
+import 'package:project_domestic_violence/app/modules/Post/post_detail_view.dart';
 import 'package:project_domestic_violence/app/utils/color.dart';
+import 'package:project_domestic_violence/app/utils/toast.dart';
 
-class BlogView extends StatefulWidget {
+class PostView extends StatefulWidget {
   @override
-  State<BlogView> createState() => _BlogViewState();
+  State<PostView> createState() => _PostViewState();
 }
 
-class _BlogViewState extends State<BlogView> {
-  late BlogController blogController;
+class _PostViewState extends State<PostView> {
+  late PostController postController;
   final List<XFile> _selectedImages = [];
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
+  int? _selectedCategory;
+  late AppWritePostProvider appWritePostProvider;
 
-  final RxList<Blog> posts = <Blog>[].obs;
+  // Test realtime
+  late Future<List<Map<String, dynamic>>> _items;
+  List<Post> posts = <Post>[].obs;
+  late Stream<List<Post>> _realtimeStream;
 
   @override
   void initState() {
     super.initState();
-    blogController = BlogController(BlogRepository(AppWritePostProvider()));
-    fetchBlogs();
-  }
+    appWritePostProvider = AppWritePostProvider();
+    postController = PostController(PostRepository(AppWritePostProvider()));
 
-  Future<void> fetchBlogs() async {
-    try {
-      List<Map<String, dynamic>> rawPosts = await blogController.fetchPosts();
+    // Test realtime
+    _items = appWritePostProvider.fetchPosts();
+    _realtimeStream = appWritePostProvider.subscribeToRealtimePost();
 
-      posts.value = rawPosts.map((post) => Blog.fromJson(post)).toList();
-    } catch (e) {
-      print("Error fetching post 222: $e");
-    }
+    _items.then((value) {
+      setState(() {
+        posts.assignAll(value.map((data) => Post.fromJson(data)).toList());
+      });
+    });
+
+    // Lắng nghe sự kiện realtime và gán dữ liệu vào `posts`
+    _realtimeStream.listen((data) {
+      setState(() {
+        posts.assignAll(data);
+      });
+      print("Updated posts: ${posts.length}");
+    }, onError: (error) {
+      print("Error in real-time stream: $error");
+    });
   }
 
   Future<void> _pickImages(StateSetter setState) async {
@@ -64,18 +80,18 @@ class _BlogViewState extends State<BlogView> {
 
   void _savePost(BuildContext context) {
     if (titleController.text.isEmpty || contentController.text.isEmpty) {
-      Get.snackbar("Error", "Title and content cannot be empty.");
+      BaseToast.showErrorToast("Error", "Topic and content cannot be empty.");
       return;
     }
 
     if (_selectedImages.isEmpty) {
-      Get.snackbar("Error", "Please select at least one image.");
+      BaseToast.showErrorToast("Error", "Please select at least one image.");
       return;
     }
 
     for (var image in _selectedImages) {
       if (!isValidFileType(image.path)) {
-        Get.snackbar(
+        BaseToast.showErrorToast(
             "Error", "Unsupported file format. Please upload an image.");
         return;
       }
@@ -84,21 +100,21 @@ class _BlogViewState extends State<BlogView> {
     Map<String, dynamic> blogData = {
       'title': titleController.text,
       'content': contentController.text,
-      'type': 1,
+      'type': _selectedCategory,
     };
 
     List<String> imagePaths =
         _selectedImages.map((image) => image.path).toList();
 
-    blogController.createPost(blogData, imagePaths).then((_) {
-      fetchBlogs();
+    postController.createPost(blogData, imagePaths).then((_) {
+      // fetchBlogs();
       titleController.clear();
       contentController.clear();
       _selectedImages.clear();
-      Get.snackbar("Success", "Blog post created successfully!");
+      BaseToast.showSuccessToast("Success", "Blog post created successfully!");
       Navigator.of(context).pop();
     }).catchError((error) {
-      Get.snackbar("Error", "Failed to create post: $error");
+      BaseToast.showErrorToast("Error", "Failed to create post: $error");
     });
   }
 
@@ -110,13 +126,12 @@ class _BlogViewState extends State<BlogView> {
         appBar: AppBar(
           backgroundColor: ColorData.colorNavBar,
           leading: Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: Image.asset(
-              'assets/images/icontym.png',
-              width: 150,
-              height: 150,
-            ),
-          ),
+              padding: EdgeInsets.only(left: 10),
+              child: Icon(
+                Icons.explore,
+                size: 30,
+                color: ColorData.colorIcon,
+              )),
           title: Center(
             child: Text(
               "Useful Information",
@@ -163,10 +178,10 @@ class _BlogViewState extends State<BlogView> {
         backgroundColor: Colors.white,
         body: TabBarView(
           children: [
-            buildBlogList(context),
-            Container(),
-            Container(),
-            Container(),
+            buildBlogList(1, posts),
+            buildBlogList(2, posts),
+            buildBlogList(3, posts),
+            buildBlogList(4, posts),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -180,36 +195,35 @@ class _BlogViewState extends State<BlogView> {
     );
   }
 
-  Widget buildBlogList(BuildContext context) {
-    return Obx(
-      () => ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (context, index) {
-          final blog = posts[index];
-          return StoryComponent(
-            nameStory: blog.title,
-            descStory: blog.content,
-            onPresseDetail: () {
-              // detail
-              print('detail');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlogDetail(
-                    nameStory: blog.title,
-                    descStory: blog.content,
-                    imageUrls: blog.image,
-                  ),
+  Widget buildBlogList(int type, List<Post> posts) {
+    // Filter the posts based on the provided type
+    final filteredPosts = posts.where((blog) => blog.type == type).toList();
+
+    return ListView.builder(
+      itemCount: filteredPosts.length,
+      itemBuilder: (context, index) {
+        final blog = filteredPosts[index];
+        return StoryComponent(
+          nameStory: blog.title,
+          descStory: blog.content,
+          onPresseDetail: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlogDetail(
+                  nameStory: blog.title,
+                  descStory: blog.content,
+                  imageUrls: blog.image,
                 ),
-              );
-            },
-            imageUrls: blog.image,
-            onPresseFav: () {
-              print('fav');
-            },
-          );
-        },
-      ),
+              ),
+            );
+          },
+          imageUrls: blog.image,
+          onPresseFav: () {
+            print('fav');
+          },
+        );
+      },
     );
   }
 
@@ -227,6 +241,9 @@ class _BlogViewState extends State<BlogView> {
           builder: (context, scrollController) {
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
+                // Dropdown value selected by the user (int type)
+                // int? _selectedCategory;
+
                 return Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -256,6 +273,40 @@ class _BlogViewState extends State<BlogView> {
                           border: OutlineInputBorder(),
                         ),
                       ),
+                      SizedBox(height: 10),
+
+                      // Dropdown button for category selection
+                      DropdownButtonFormField<int>(
+                        decoration: InputDecoration(
+                          labelText: 'Choose category',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedCategory, // Value of dropdown
+                        items: [
+                          DropdownMenuItem(
+                            value: 1,
+                            child: Text('Stories'),
+                          ),
+                          DropdownMenuItem(
+                            value: 2,
+                            child: Text('Support'),
+                          ),
+                          DropdownMenuItem(
+                            value: 3,
+                            child: Text('Legal'),
+                          ),
+                          DropdownMenuItem(
+                            value: 4,
+                            child: Text('Solutions'),
+                          ),
+                        ],
+                        onChanged: (int? newValue) {
+                          setState(() {
+                            _selectedCategory = newValue;
+                          });
+                        },
+                      ),
+
                       SizedBox(height: 10),
                       TextField(
                         controller: contentController,
@@ -291,9 +342,7 @@ class _BlogViewState extends State<BlogView> {
                                       color: ColorData.colorIcon,
                                       size: 28,
                                     ),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
+                                    SizedBox(width: 20),
                                     Icon(
                                       Icons.video_call_rounded,
                                       color: ColorData.colorIcon,
@@ -306,51 +355,51 @@ class _BlogViewState extends State<BlogView> {
                           ),
                         ),
                       ),
-                      // SizedBox(height: 10),
                       if (_selectedImages.isNotEmpty)
                         Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children:
-                                List.generate(_selectedImages.length, (index) {
-                              return Stack(
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    height: 100,
-                                    child: Image.file(
-                                      File(_selectedImages[index].path),
-                                      fit: BoxFit.cover,
-                                    ),
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children:
+                              List.generate(_selectedImages.length, (index) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  child: Image.file(
+                                    File(_selectedImages[index].path),
+                                    fit: BoxFit.cover,
                                   ),
-                                  Positioned(
-                                    right: 0,
-                                    child: IconButton(
-                                      icon: Container(
-                                        padding: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                        ),
-                                        child: Icon(
-                                          Icons.close,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  child: IconButton(
+                                    icon: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(50),
                                       ),
-                                      onPressed: () =>
-                                          _removeImage(index, setState),
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
                                     ),
+                                    onPressed: () =>
+                                        _removeImage(index, setState),
                                   ),
-                                ],
-                              );
-                            })),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
                       SizedBox(height: 10),
                       ButtonComponent(
                         text: 'Post',
                         onPress: () {
                           _savePost(context);
+                          print("Post");
                         },
                         backgroundColor: ColorData.colorMain,
                         textColor: Colors.white,

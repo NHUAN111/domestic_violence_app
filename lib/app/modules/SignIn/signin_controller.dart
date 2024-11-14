@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_domestic_violence/app/data/repository/authRepository.dart';

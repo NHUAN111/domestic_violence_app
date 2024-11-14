@@ -1,11 +1,13 @@
 class UserModel {
   String? userName;
   String? email;
+  String? password;
   String? accountId;
 
   UserModel({
     this.userName,
     this.email,
+    this.password,
     this.accountId,
   });
 
@@ -13,6 +15,7 @@ class UserModel {
     return {
       'userName': userName,
       'email': email,
+      'password': password,
       'accountId': accountId,
     };
   }
@@ -22,6 +25,7 @@ class UserModel {
     return UserModel(
       userName: json['userName'],
       email: json['email'],
+      password: json['password'],
       accountId: json['accountId'],
     );
   }

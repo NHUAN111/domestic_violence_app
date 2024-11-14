@@ -1,11 +1,38 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_domestic_violence/app/components/ProfileCardComponent.dart';
+import 'package:project_domestic_violence/app/components/profile_card_component.dart';
+import 'package:project_domestic_violence/app/models/user.dart';
 import 'package:project_domestic_violence/app/routes/app_pages.dart';
 import 'package:project_domestic_violence/app/utils/color.dart';
+import 'package:project_domestic_violence/app/utils/constant.dart';
+import 'package:project_domestic_violence/app/utils/toast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  late String name;
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userJson = prefs.getString(Constant.USER) ?? '';
+    if (userJson.isNotEmpty) {
+      UserModel user = UserModel.fromJson(jsonDecode(userJson));
+      name = user.userName ?? '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +50,7 @@ class ProfileView extends StatelessWidget {
                   height: 140,
                 ),
                 Text(
-                  'Hello Nhuan',
+                  'Hello ${name}',
                   style: const TextStyle(
                     fontSize: 18,
                     color: ColorData.colorText,
@@ -46,28 +73,40 @@ class ProfileView extends StatelessWidget {
               ),
               onPress: () {
                 // Action for Personal Page
+                Get.toNamed(Routes.profileDetail);
               },
               nameFuction: 'Personal Page',
             ),
             ProfileCardComponent(
               icon: Icon(
-                Icons.edit,
+                Icons.history_outlined,
                 color: ColorData.colorIcon,
               ),
               onPress: () {
-                Get.toNamed(Routes.settingPhone);
+                //
               },
-              nameFuction: 'Customize Calls',
+              nameFuction: 'My Journal',
             ),
             ProfileCardComponent(
               icon: Icon(
-                Icons.favorite,
-                color: ColorData.colorSos,
+                Icons.map,
+                color: ColorData.colorIcon,
               ),
               onPress: () {
-                Get.toNamed(Routes.settingPhone);
+                //
+                Get.toNamed(Routes.test);
               },
-              nameFuction: 'Your Favorites',
+              nameFuction: 'Nearby Support',
+            ),
+            ProfileCardComponent(
+              icon: Icon(
+                Icons.sms,
+                color: ColorData.colorIcon,
+              ),
+              onPress: () {
+                //
+              },
+              nameFuction: 'Emergency Contact Config',
             ),
             const Divider(
               color: Colors.grey,
@@ -84,6 +123,13 @@ class ProfileView extends StatelessWidget {
               ),
               onPress: () {
                 // Action for Log Out
+                BaseToast.showConfirmToast(
+                  "Notification",
+                  "Are you sure logout ?",
+                  () {
+                    clearUserData();
+                  },
+                );
               },
               nameFuction: 'Log Out',
             ),
@@ -92,4 +138,11 @@ class ProfileView extends StatelessWidget {
       ),
     );
   }
+}
+
+void clearUserData() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(Constant.USER);
+  BaseToast.showSuccessToast("Success", "Logout successful");
+  Get.offAllNamed(Routes.signin);
 }

@@ -4,8 +4,6 @@ import 'package:project_domestic_violence/app/data/repository/authRepository.dar
 import 'package:project_domestic_violence/app/modules/SignUp/signup_controller.dart';
 import 'dart:ui';
 
-import 'package:project_domestic_violence/app/utils/toast.dart';
-
 class SignUpView extends StatefulWidget {
   const SignUpView({Key? key}) : super(key: key);
 

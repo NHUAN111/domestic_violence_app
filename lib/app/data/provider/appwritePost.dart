@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:appwrite/appwrite.dart';
 import 'package:project_domestic_violence/app/data/provider/config.dart';
+import 'package:project_domestic_violence/app/models/post.dart';
 import 'package:project_domestic_violence/app/utils/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,40 +10,41 @@ class AppWritePostProvider {
   Client client = Client();
   Databases? databases;
   Storage? storage;
+  Realtime? realtime;
+  StreamSubscription? postSubscription;
 
   AppWritePostProvider() {
+    // Initialize client
     client
         .setEndpoint(Config.endpoint)
         .setProject(Config.projectId)
-        .setSelfSigned(
-            status: true); // Self-signed certificates (for local dev)
+        .setSelfSigned(status: true);
 
     databases = Databases(client);
     storage = Storage(client);
+    realtime = Realtime(client);
   }
 
-  // Function to upload images to Appwrite storage bucket
   Future<List<String>> uploadImages(List<String> imagePaths) async {
-    List<String> fileIds = []; // List to store the uploaded file IDs
+    List<String> fileIds = [];
 
     for (String imagePath in imagePaths) {
       try {
-        final fileName =
-            imagePath.split('/').last; // Extract file name from path
+        final fileName = imagePath.split('/').last;
         final file = await storage!.createFile(
           bucketId: Config.bucketId,
           fileId: ID.unique(),
           file: InputFile.fromPath(path: imagePath, filename: fileName),
         );
         print('Image uploaded successfully: ${file.$id}');
-        fileIds.add(file.$id); // Add the uploaded file ID to the list
+        fileIds.add(file.$id);
       } catch (e) {
         print('Error uploading image: $e');
-        throw Exception('Không thể tải lên hình ảnh: $e');
+        throw Exception('Cannot upload image: $e');
       }
     }
 
-    return fileIds; // Return the list of uploaded file IDs
+    return fileIds;
   }
 
   Future<void> createPost(
@@ -90,6 +93,59 @@ class AppWritePostProvider {
     }
   }
 
+  Stream<List<Post>> subscribeToRealtimePost() {
+    final controller = StreamController<List<Post>>();
+
+    fetchPosts().then((initialPosts) {
+      List<Post> currentPosts =
+          initialPosts.map((data) => Post.fromJson(data)).toList();
+
+      // Phát dữ liệu ban đầu
+      controller.add(List<Post>.from(currentPosts));
+
+      realtime!
+          .subscribe([
+            'databases.${Config.databaseId}.collections.${Config.postCollectionId}.documents'
+          ])
+          .stream
+          .listen((event) {
+            final payload = event.payload;
+            Map<String, dynamic> postData = payload;
+
+            // Đảm bảo có dữ liệu
+            if (postData.isNotEmpty) {
+              Post post = Post.fromJson(postData);
+
+              if (event.events.any((e) => e.contains('create'))) {
+                // Xử lý sự kiện thêm mới
+                currentPosts.add(post);
+                print("Post created: ${post.id}");
+              } else if (event.events.any((e) => e.contains('update'))) {
+                // Xử lý sự kiện cập nhật
+                int index = currentPosts.indexWhere((p) => p.id == post.id);
+                if (index != -1) {
+                  currentPosts[index] = post;
+                  print("Post updated: ${post.id}");
+                } else {
+                  print("Update event but post not found: ${post.id}");
+                }
+              } else if (event.events.any((e) => e.contains('delete'))) {
+                // Xử lý sự kiện xóa
+                currentPosts.removeWhere((p) => p.id == post.id);
+                print("Post deleted: ${post.id}");
+              }
+            } else {
+              print("Received empty payload.");
+            }
+
+            // Phát danh sách cập nhật
+            controller.add(List<Post>.from(currentPosts));
+          });
+    });
+
+    return controller.stream;
+  }
+
   Future<List<Map<String, dynamic>>> fetchPosts() async {
     List<Map<String, dynamic>> posts = [];
 
@@ -100,22 +156,17 @@ class AppWritePostProvider {
       );
 
       for (var document in response.documents) {
-        // Use null-aware operators to prevent accessing null values
-        String title = document.data['title'] ?? "No Title"; // Default title
-        String content =
-            document.data['content'] ?? "No Content"; // Default content
+        String title = document.data['title'] ?? "No Title";
+        String content = document.data['content'] ?? "No Content";
+        int type = document.data['type'] ?? 0;
 
-        // Assuming the 'image' field contains a list of image IDs
-        List<dynamic>? imageIds =
-            document.data['image']; // Fetching image IDs, allowing null
+        List<dynamic>? imageIds = document.data['image'];
         List<String> imageUrls = [];
 
         if (imageIds != null) {
-          // Fetch the URLs for each image if imageIds is not null
           for (var imageId in imageIds) {
             if (imageId != null) {
-              String imageUrl =
-                  await getImageUrl(imageId); // Get URL for each image
+              String imageUrl = await getImageUrl(imageId);
               imageUrls.add(imageUrl);
             } else {
               print('Image ID is null, skipping.');
@@ -123,25 +174,67 @@ class AppWritePostProvider {
           }
         }
 
-        // Add the post to the list with checks
         posts.add({
           'id': document.$id,
           'title': title,
           'content': content,
           'images': imageUrls,
-          'type': 1,
+          'type': type,
         });
       }
-
-      // print('Posts fetched successfully: $posts');
     } catch (e) {
-      print('Error fetching posts 11: $e');
+      print('Error fetching posts: $e');
     }
 
     return posts;
   }
 
-  // Function to get image URL from the storage bucket
+  Future<List<Map<String, dynamic>>> fetchPostsByUserId(String userId) async {
+    List<Map<String, dynamic>> posts = [];
+
+    try {
+      final response = await databases!.listDocuments(
+        databaseId: Config.databaseId,
+        collectionId: Config.postCollectionId,
+        queries: [
+          Query.equal('userId', userId) // Filter by userId
+        ],
+      );
+
+      for (var document in response.documents) {
+        String title = document.data['title'] ?? "No Title";
+        String content = document.data['content'] ?? "No Content";
+        int type = document.data['type'] ?? 0;
+
+        List<dynamic>? imageIds = document.data['image'];
+        List<String> imageUrls = [];
+
+        if (imageIds != null) {
+          for (var imageId in imageIds) {
+            if (imageId != null) {
+              String imageUrl = await getImageUrl(imageId);
+              imageUrls.add(imageUrl);
+            } else {
+              print('Image ID is null, skipping.');
+            }
+          }
+        }
+
+        posts.add({
+          'id': document.$id,
+          'title': title,
+          'content': content,
+          'images': imageUrls,
+          'type': type,
+        });
+      }
+    } catch (e) {
+      print('Error fetching posts by userId: $e');
+    }
+
+    return posts;
+  }
+
   Future<String> getImageUrl(String imageId) async {
     try {
       final file = await storage!.getFile(
@@ -154,11 +247,16 @@ class AppWritePostProvider {
         return imageUrl;
       } else {
         print('File not found for image ID: $imageId');
-        return ''; // Return an empty string if file not found
+        return '';
       }
     } catch (e) {
       print('Error fetching image URL: $e');
-      return ''; // Return an empty string on error
+      return '';
     }
+  }
+
+  void dispose() {
+    // Clean up the real-time subscription
+    postSubscription?.cancel();
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_domestic_violence/app/modules/Blog/blog_view.dart';
+import 'package:project_domestic_violence/app/modules/Post/post_view.dart';
 import 'package:project_domestic_violence/app/modules/Home/home_view.dart';
 import 'package:project_domestic_violence/app/modules/Phone/phone_view.dart';
 import 'package:project_domestic_violence/app/modules/Profile/profile_view.dart';
@@ -21,7 +21,7 @@ class _MainViewState extends State<MainView> {
     var screens = [
       HomeView(),
       PhoneView(),
-      BlogView(),
+      PostView(),
       ProfileView(),
     ];
 

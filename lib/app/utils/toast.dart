@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 class BaseToast {
   static void showSuccessToast(String title, String message) {
     Get.snackbar(
-      title, // Tiêu đề thông báo
-      message, // Nội dung thông báo
-      snackPosition: SnackPosition.TOP, // Vị trí của toast
-      backgroundColor: Colors.green, // Màu nền (xanh cho thành công)
+      title,
+      message,
+      snackPosition: SnackPosition.TOP,
+      backgroundColor:
+          Colors.green.withOpacity(0.8), // Màu nền (xanh cho thành công)
       colorText: Colors.white, // Màu chữ
       icon: Icon(Icons.check_circle, color: Colors.white), // Icon thông báo
       duration: Duration(seconds: 3), // Thời gian hiện thông báo
@@ -19,7 +20,8 @@ class BaseToast {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.red, // Màu nền đỏ cho thông báo lỗi
+      backgroundColor:
+          Colors.red.withOpacity(0.8), // Màu nền đỏ cho thông báo lỗi
       colorText: Colors.white,
       icon: Icon(Icons.error, color: Colors.white),
       duration: Duration(seconds: 3),
@@ -31,32 +33,35 @@ class BaseToast {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.orange, // Màu nền cam cho cảnh báo
+      backgroundColor:
+          Colors.orange.withOpacity(0.8), // Màu nền cam cho cảnh báo
       colorText: Colors.white,
       icon: Icon(Icons.warning, color: Colors.white),
       duration: Duration(seconds: 3),
     );
   }
 
-  void showConfirmToast(String title, String message) {
+  static void showConfirmToast(
+      String title, String message, final VoidCallback onPresse) {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue, // Màu nền xanh cho xác nhận
+      snackPosition: SnackPosition.TOP,
+      backgroundColor:
+          Colors.blue.withOpacity(0.8), // Màu nền xanh cho xác nhận
       colorText: Colors.white,
       icon: Icon(Icons.info, color: Colors.white), // Icon cho xác nhận
       duration: Duration(seconds: 3),
       mainButton: TextButton(
         onPressed: () {
-          // Xử lý khi người dùng xác nhận
+          onPresse();
         },
-        child: Text('Xác nhận', style: TextStyle(color: Colors.white)),
+        child: Text('Confirm ', style: TextStyle(color: Colors.white)),
       ),
     );
   }
 
-  void showLoadingToast({String message = 'Đang tải...'}) {
+  static void showLoadingToast({String message = 'Loading...'}) {
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent, // Nền trong suốt

@@ -34,6 +34,7 @@ class AppWriteUserProvider {
         data: {
           'username': map['name'],
           'email': map['email'],
+          'password': map['password'],
           'accountID': response.$id,
         },
       );
@@ -56,6 +57,7 @@ class AppWriteUserProvider {
       final userModel = UserModel.fromJson({
         'userName': user.name,
         'email': user.email,
+        'password': password,
         'accountId': user.$id,
       });
 

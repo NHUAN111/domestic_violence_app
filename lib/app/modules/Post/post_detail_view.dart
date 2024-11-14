@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_domestic_violence/app/components/DetailStoryComponent.dart';
+import 'package:project_domestic_violence/app/components/detail_story_omponent.dart';
 import 'package:project_domestic_violence/app/utils/color.dart';
 import 'package:project_domestic_violence/app/utils/text.dart'; // Giả sử bạn có tiện ích cho văn bản
 

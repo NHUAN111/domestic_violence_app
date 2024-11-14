@@ -74,4 +74,41 @@ class DatabaseHelperContact {
       return [];
     }
   }
+
+  // Xóa contact theo contactId
+  Future<void> deleteContact(int contactId) async {
+    final db = await database;
+
+    try {
+      await db.delete(
+        'contacts',
+        where: 'contactId = ?',
+        whereArgs: [contactId],
+      );
+      print('Delete successful: $contactId');
+    } catch (e) {
+      print('Error deleting contact: $e');
+    }
+  }
+
+  // Cập nhật thông tin contact
+  Future<void> updateContact(Contact contact) async {
+    final db = await database;
+
+    try {
+      await db.update(
+        'contacts',
+        {
+          'userId': contact.userId.toString(),
+          'name': contact.name.toString(),
+          'phoneNumber': contact.phoneNumber.toString(),
+        },
+        where: 'contactId = ?',
+        whereArgs: [contact.contactId],
+      );
+      print('Update successful: ${contact.contactId}');
+    } catch (e) {
+      print('Error updating contact: $e');
+    }
+  }
 }

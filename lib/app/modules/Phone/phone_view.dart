@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:project_domestic_violence/app/components/ButtonComponent.dart';
-import 'package:project_domestic_violence/app/components/ContactComponent.dart';
+import 'package:get/get.dart';
+import 'package:project_domestic_violence/app/components/button_component.dart';
+import 'package:project_domestic_violence/app/components/contact_component.dart';
 import 'package:project_domestic_violence/app/data/localdata/LocalStorageService.dart';
 import 'package:project_domestic_violence/app/models/contact.dart';
+import 'package:project_domestic_violence/app/models/user.dart';
+import 'package:project_domestic_violence/app/routes/app_pages.dart';
 import 'package:project_domestic_violence/app/utils/color.dart';
-import 'package:project_domestic_violence/app/utils/text.dart';
+import 'package:project_domestic_violence/app/utils/constant.dart';
+import 'package:project_domestic_violence/app/utils/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,24 +22,23 @@ class PhoneView extends StatefulWidget {
 class _PhoneViewState extends State<PhoneView> {
   final DatabaseHelperContact _databaseService = DatabaseHelperContact();
   List<Contact> _contacts = [];
-  String? _selectedPhoneNumber;
 
   @override
   void initState() {
     super.initState();
     _loadContacts();
-    _loadSelectedPhoneNumber();
   }
 
-  Future<String?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userId');
-  }
-
+  // Load liên lạc
   void _loadContacts() async {
-    String? userId = await getUserId();
-    if (userId != null) {
-      List<Contact> contacts = await _databaseService.getAllContacts(userId);
+    final prefs = await SharedPreferences.getInstance();
+    String? userJson = prefs.getString(Constant.USER);
+    UserModel user = UserModel.fromJson(jsonDecode(userJson!));
+
+    print("user id ${user.accountId}");
+    if (user.accountId != null) {
+      List<Contact> contacts =
+          await _databaseService.getAllContacts(user.accountId!);
       setState(() {
         _contacts = contacts;
       });
@@ -44,18 +49,7 @@ class _PhoneViewState extends State<PhoneView> {
     }
   }
 
-  void _loadSelectedPhoneNumber() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedPhoneNumber = prefs.getString('selectedPhoneNumber');
-    });
-  }
-
-  void _saveSelectedPhoneNumber(String phoneNumber) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedPhoneNumber', phoneNumber);
-  }
-
+  // Save contact
   void _saveContact(String userId, String name, String phoneNumber) async {
     if (name.isNotEmpty && phoneNumber.isNotEmpty) {
       Contact newContact = Contact(
@@ -67,21 +61,13 @@ class _PhoneViewState extends State<PhoneView> {
       await _databaseService.insertContact(newContact);
 
       _loadContacts();
+      BaseToast.showSuccessToast("Success", "Contact save successfully");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Vui lòng nhập đầy đủ thông tin!'),
       ));
     }
   }
-
-  // Xóa danh bạ
-  // void _deleteContact(Contact contact) async {
-  //   await _databaseService.deleteContact(contact.contactId); // Xóa khỏi SQLite
-
-  //   setState(() {
-  //     _contacts.remove(contact);
-  //   });
-  // }
 
   // Thực hiện cuộc gọi
   void _makePhoneCall(String phoneNumber) async {
@@ -93,6 +79,7 @@ class _PhoneViewState extends State<PhoneView> {
     }
   }
 
+  // Modal giao diện
   void _showAddContactModal(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController phoneController = TextEditingController();
@@ -145,8 +132,10 @@ class _PhoneViewState extends State<PhoneView> {
                   text: 'Add',
                   onPress: () async {
                     final prefs = await SharedPreferences.getInstance();
-                    _saveContact(prefs.getString('userId').toString(),
-                        nameController.text, phoneController.text);
+                    String? userJson = prefs.getString(Constant.USER);
+                    UserModel user = UserModel.fromJson(jsonDecode(userJson!));
+                    _saveContact(user.accountId!, nameController.text,
+                        phoneController.text);
                     Navigator.of(context).pop();
                   },
                   backgroundColor: ColorData.colorMain,
@@ -160,6 +149,7 @@ class _PhoneViewState extends State<PhoneView> {
     );
   }
 
+  // Main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,18 +159,10 @@ class _PhoneViewState extends State<PhoneView> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // IconButton(
-            //   icon: Icon(
-            //     Icons.arrow_back_ios,
-            //     size: 22,
-            //     color: ColorData.colorIcon,
-            //   ),
-            //   onPressed: () {},
-            // ),
-            Image.asset(
-              'assets/images/icontym.png',
-              width: 50,
-              height: 50,
+            Icon(
+              Icons.contacts,
+              color: ColorData.colorIcon,
+              size: 30,
             ),
             Row(
               children: [
@@ -188,7 +170,7 @@ class _PhoneViewState extends State<PhoneView> {
                   icon: Icon(
                     Icons.add,
                     size: 26,
-                    color: ColorData.colortextSecond,
+                    color: ColorData.colorIcon,
                   ),
                   onPressed: () {
                     // Thêm
@@ -198,7 +180,7 @@ class _PhoneViewState extends State<PhoneView> {
                 Text(
                   'Add contact',
                   style: TextStyle(
-                    color: ColorData.colortextSecond,
+                    color: ColorData.colorIcon,
                     fontSize: 14,
                   ),
                 ),
@@ -210,22 +192,47 @@ class _PhoneViewState extends State<PhoneView> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: _contacts.length,
-              itemBuilder: (context, index) {
-                Contact contact = _contacts[index];
-                return ContactComponent(
-                  nameContact: contact.name.toString(),
-                  onPresseDelete: () {
-                    //
-                  },
-                  onPresseCall: () {
-                    _makePhoneCall(contact.phoneNumber ?? '');
-                  },
-                  phoneContact: contact.phoneNumber.toString(),
-                );
-              },
-            ),
+            child: _contacts.isEmpty
+                ? Center(
+                    child: Text(
+                      'No contacts available',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _contacts.length,
+                    itemBuilder: (context, index) {
+                      Contact contact = _contacts[index];
+
+                      // Check if contact is null or has no name/phone number
+                      if (contact == null ||
+                          contact.name == null ||
+                          contact.phoneNumber == null) {
+                        return ListTile(
+                          title: Text('Contact information is not available'),
+                        );
+                      }
+
+                      return ContactComponent(
+                        nameContact: contact.name.toString(),
+                        onPresseDetail: () {
+                          print('detail');
+                          Get.toNamed(Routes.detaiPhone, arguments: contact)
+                              ?.then((value) {
+                            _loadContacts();
+                          });
+                        },
+                        onPresseCall: () {
+                          print('call');
+                          // _makePhoneCall(contact.phoneNumber ?? '');
+                        },
+                        phoneContact: contact.phoneNumber.toString(),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

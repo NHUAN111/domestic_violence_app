@@ -5,13 +5,13 @@ import 'package:project_domestic_violence/app/utils/text.dart';
 class ContactComponent extends StatefulWidget {
   final String nameContact;
   final String phoneContact;
-  final VoidCallback onPresseDelete;
+  final VoidCallback onPresseDetail;
   final VoidCallback onPresseCall;
 
   const ContactComponent({
     Key? key,
     required this.nameContact,
-    required this.onPresseDelete,
+    required this.onPresseDetail,
     required this.onPresseCall,
     required this.phoneContact,
   }) : super(key: key);
@@ -67,7 +67,7 @@ class _ContactComponentState extends State<ContactComponent> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        UtilText.truncateString(widget.nameContact, 10),
+                        UtilText.truncateString(widget.nameContact, 16),
                         style: TextStyle(
                           color: ColorData.colorText,
                           fontWeight: FontWeight.w500,
@@ -88,12 +88,12 @@ class _ContactComponentState extends State<ContactComponent> {
               ),
               IconButton(
                 icon: Icon(
-                  Icons.emergency_share,
+                  Icons.call,
                   color: ColorData.colorSos,
                   size: 28,
                 ),
                 onPressed: () {
-                  widget.onPresseCall;
+                  widget.onPresseCall();
                 },
               ),
               IconButton(
@@ -103,7 +103,7 @@ class _ContactComponentState extends State<ContactComponent> {
                   size: 28,
                 ),
                 onPressed: () {
-                  widget.onPresseDelete;
+                  widget.onPresseDetail();
                 },
               ),
             ],
