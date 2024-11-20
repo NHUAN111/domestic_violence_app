@@ -83,6 +83,7 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               onPress: () {
                 //
+                Get.toNamed(Routes.recordlist);
               },
               nameFuction: 'My Journal',
             ),

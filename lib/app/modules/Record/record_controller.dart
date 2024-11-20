@@ -17,9 +17,9 @@ class RecordController extends GetxController {
     } catch (e) {
       print("Error creating recordModel : $e");
     }
+  }
 
-    Future<List<Map<String, dynamic>>> fetchRecordsByUserId(String id) async {
-      return await recordRepository.fetchRecordsByUserId(id);
-    }
+  Future<List<Map<String, dynamic>>> fetchRecordsByUserId(String id) async {
+    return await recordRepository.fetchRecordsByUserId(id);
   }
 }

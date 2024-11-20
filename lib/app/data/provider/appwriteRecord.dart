@@ -142,7 +142,7 @@ class AppwriteRecord {
   Future<String> getImageUrl(String imageId) async {
     try {
       final file = await storage!.getFile(
-        bucketId: Config.bucketId,
+        bucketId: Config.recordbucketId,
         fileId: imageId,
       );
       if (file.$id != null) {
