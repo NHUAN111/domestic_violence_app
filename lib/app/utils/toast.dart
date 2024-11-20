@@ -1,5 +1,8 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_domestic_violence/app/components/button_component.dart';
+import 'package:project_domestic_violence/app/utils/color.dart';
 
 class BaseToast {
   static void showSuccessToast(String title, String message) {
@@ -81,9 +84,106 @@ class BaseToast {
     );
   }
 
-  void hideLoadingToast() {
+  static void hideLoadingToast() {
     if (Get.isDialogOpen ?? false) {
       Get.back(); // Đóng dialog
     }
+  }
+
+  static void showDialogCallPolice(BuildContext context,
+      final VoidCallback onPresse, String title, String desc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: Icon(
+            Icons.help,
+            size: 40,
+            color: ColorData.colorSos,
+          ),
+          title: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorData.colorSos,
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            desc,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.w400),
+          ),
+          actions: <Widget>[
+            Center(
+              child: ButtonComponent(
+                text: "Confirm",
+                onPress: () {
+                  Navigator.of(context).pop(); // Đóng dialog
+                  onPresse();
+                },
+                backgroundColor: ColorData.colorSos,
+                textColor: Colors.white,
+                width: 250,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showDialogSendMess(
+      BuildContext context, final VoidCallback onPresse) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: AnimatedTextKit(
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  'Sending urgent message...',
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    color: ColorData.colorSos,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  speed: const Duration(milliseconds: 50),
+                ),
+              ],
+              totalRepeatCount: 20,
+              displayFullTextOnTap: true,
+            ),
+          ),
+          actions: <Widget>[
+            SizedBox(
+              height: 20,
+            ),
+            Center(
+              child: Image.asset(
+                'assets/images/sms.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            TextButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog
+                onPresse();
+              },
+              label: Text(
+                "Go to configuration",
+                style: TextStyle(color: ColorData.colorText),
+              ),
+              icon: Icon(Icons.navigate_next, color: ColorData.colorText),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

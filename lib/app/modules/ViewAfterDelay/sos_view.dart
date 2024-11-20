@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_domestic_violence/app/utils/color.dart';
@@ -45,6 +46,22 @@ class _SoSViewAnimationState extends State<SoSViewAnimation>
           children: [
             SizedBox(
               height: 10,
+            ),
+            AnimatedTextKit(
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  'Calling emergency...',
+                  textStyle: const TextStyle(
+                    fontSize: 24,
+                    color: ColorData.colorSos,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  speed: const Duration(milliseconds: 50),
+                ),
+              ],
+              totalRepeatCount: 20,
+              displayFullTextOnTap: true,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),

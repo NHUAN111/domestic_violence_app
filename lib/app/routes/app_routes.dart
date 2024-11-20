@@ -13,6 +13,15 @@ abstract class Routes {
   static const profileEdit = _Paths.profileEdit;
   static const sosview = _Paths.sosview;
   static const callpoliceview = _Paths.callpolice;
+  static const smsconfig = _Paths.smsconfig;
+  static const smsaddtitle = _Paths.smsaddtitle;
+  static const recordfirst = _Paths.recordfirst;
+  static const recordsecond = _Paths.recordsecond;
+  static const recordthird = _Paths.recordthird;
+  static const recordlist = _Paths.recordlist;
+  static const locationmap = _Paths.locationmap;
+  static const sharelocationview = _Paths.sharelocationview;
+  static const safeplacesview = _Paths.safeplacesview;
   static const test = _Paths.test;
 }
 
@@ -29,5 +38,14 @@ abstract class _Paths {
   static const profileEdit = '/profileEdit';
   static const sosview = '/sosview';
   static const callpolice = '/callpolice';
+  static const smsconfig = '/smsconfig';
+  static const smsaddtitle = '/smsaddtitle';
+  static const recordfirst = '/recordfirst';
+  static const recordsecond = '/recordsecond';
+  static const recordthird = '/recordthird';
+  static const recordlist = '/recordlist';
+  static const locationmap = '/locationmap';
+  static const sharelocationview = '/sharelocationview';
+  static const safeplacesview = '/safeplacesview';
   static const test = '/test';
 }

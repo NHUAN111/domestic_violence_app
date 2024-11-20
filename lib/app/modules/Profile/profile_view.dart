@@ -72,7 +72,6 @@ class _ProfileViewState extends State<ProfileView> {
                 color: ColorData.colorIcon,
               ),
               onPress: () {
-                // Action for Personal Page
                 Get.toNamed(Routes.profileDetail);
               },
               nameFuction: 'Personal Page',
@@ -93,10 +92,9 @@ class _ProfileViewState extends State<ProfileView> {
                 color: ColorData.colorIcon,
               ),
               onPress: () {
-                //
-                Get.toNamed(Routes.test);
+                Get.toNamed(Routes.safeplacesview);
               },
-              nameFuction: 'Nearby Support',
+              nameFuction: 'Safe Places',
             ),
             ProfileCardComponent(
               icon: Icon(
@@ -104,7 +102,7 @@ class _ProfileViewState extends State<ProfileView> {
                 color: ColorData.colorIcon,
               ),
               onPress: () {
-                //
+                Get.toNamed(Routes.smsconfig);
               },
               nameFuction: 'Emergency Contact Config',
             ),

@@ -127,7 +127,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                     SizedBox(
-                      width: 100,
+                      width: 98,
                       child: Image.asset(
                         'assets/images/victim.png',
                         fit: BoxFit.cover,
@@ -159,9 +159,7 @@ class _HomeViewState extends State<HomeView> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          const Color.fromARGB(255, 247, 88, 88)
-                                              .withOpacity(0.7),
+                                      color: ColorData.colorSos,
                                       spreadRadius: 10,
                                       blurRadius: 50,
                                     ),
@@ -173,8 +171,7 @@ class _HomeViewState extends State<HomeView> {
                                     Get.toNamed(Routes.sosview);
                                   },
                                   child: Card(
-                                    elevation: 10,
-                                    color: Colors.red,
+                                    color: ColorData.colorSos,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(100),
                                     ),
@@ -184,7 +181,7 @@ class _HomeViewState extends State<HomeView> {
                                       height: 140,
                                       decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.red,
+                                        color: ColorData.colorSos,
                                       ),
                                       alignment: Alignment.center,
                                       child: const Text(
@@ -225,34 +222,36 @@ class _HomeViewState extends State<HomeView> {
                       label: ' Call Police',
                       icon: Icons.local_police,
                       onPressed: () {
-                        //
-                        BaseToast.showConfirmToast("Notification",
-                            "Please confirm to transfer the call to the police",
-                            () {
-                          //
+                        BaseToast.showDialogCallPolice(context, () {
                           Get.toNamed(Routes.callpoliceview);
-                        });
+                        }, "Notification",
+                            "Please confirm to transfer the call to the police");
                       },
                     ),
                     EmergencyButtonComponent(
                       label: ' SMS SOS',
                       icon: Icons.sms,
                       onPressed: () {
-                        //
+                        BaseToast.showDialogSendMess(
+                          context,
+                          () {
+                            Get.toNamed(Routes.smsconfig);
+                          },
+                        );
                       },
                     ),
                     EmergencyButtonComponent(
                       label: ' Record ',
                       icon: Icons.video_call,
                       onPressed: () {
-                        //
+                        Get.toNamed(Routes.recordfirst);
                       },
                     ),
                     EmergencyButtonComponent(
                       label: ' Share Location',
                       icon: Icons.emergency_share,
                       onPressed: () {
-                        //
+                        Get.toNamed(Routes.locationmap);
                       },
                     ),
                     EmergencyButtonComponent(

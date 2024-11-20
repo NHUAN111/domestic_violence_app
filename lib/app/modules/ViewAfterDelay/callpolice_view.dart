@@ -16,7 +16,14 @@ class _CallPoliceViewState extends State<CallPoliceView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Call Police"),
+        title: const Text(
+          "Call Police",
+          style: TextStyle(
+            color: ColorData.colorIcon,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -26,7 +33,11 @@ class _CallPoliceViewState extends State<CallPoliceView> {
           children: [
             Card(
               elevation: 2,
+              color: Color.fromARGB(255, 255, 230, 230),
               margin: const EdgeInsets.only(bottom: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -34,10 +45,18 @@ class _CallPoliceViewState extends State<CallPoliceView> {
                     Expanded(
                       child: Text(
                         "Emergency assistance (Call the police)",
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ColorData.colorSos,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
-                    Icon(Icons.local_police, color: Colors.blue),
+                    Icon(
+                      Icons.local_police,
+                      color: ColorData.colorSos,
+                      size: 34,
+                    ),
                   ],
                 ),
               ),
@@ -47,30 +66,26 @@ class _CallPoliceViewState extends State<CallPoliceView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Stack(
-                    children: [
-                      AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            'Calling...',
-                            textStyle: const TextStyle(
-                              fontSize: 24,
-                              color: ColorData.colorSos,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            speed: const Duration(milliseconds: 200),
-                          ),
-                        ],
-                        totalRepeatCount:
-                            1, // Loop it once, or use `repeatForever` to loop indefinitely
-                        displayFullTextOnTap: true,
-                      ),
-                      Image.asset(
-                        "assets/images/callpolice.png",
+                  const SizedBox(height: 10),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TypewriterAnimatedText(
+                        'Calling...',
+                        textStyle: const TextStyle(
+                          fontSize: 24,
+                          color: ColorData.colorSos,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        speed: const Duration(milliseconds: 50),
                       ),
                     ],
+                    totalRepeatCount: 20,
+                    displayFullTextOnTap: true,
                   ),
-                  const SizedBox(height: 10),
+                  Image.asset(
+                    "assets/images/callpolice.png",
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ButtonComponent(
