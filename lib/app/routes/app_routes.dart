@@ -22,6 +22,7 @@ abstract class Routes {
   static const locationmap = _Paths.locationmap;
   static const sharelocationview = _Paths.sharelocationview;
   static const safeplacesview = _Paths.safeplacesview;
+  static const calmconnerScreen = _Paths.calmconnerScreen;
   static const test = _Paths.test;
 }
 
@@ -47,5 +48,6 @@ abstract class _Paths {
   static const locationmap = '/locationmap';
   static const sharelocationview = '/sharelocationview';
   static const safeplacesview = '/safeplacesview';
+  static const calmconnerScreen = '/calmconnerScreen';
   static const test = '/test';
 }

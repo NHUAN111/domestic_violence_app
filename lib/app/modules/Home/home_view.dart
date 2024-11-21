@@ -258,7 +258,7 @@ class _HomeViewState extends State<HomeView> {
                       label: ' Stealth Mode',
                       icon: Icons.visibility,
                       onPressed: () {
-                        //
+                        Get.toNamed(Routes.calmconnerScreen);
                       },
                     ),
                   ],

@@ -17,6 +17,7 @@ import 'package:project_domestic_violence/app/modules/SignIn/signin_view.dart';
 import 'package:project_domestic_violence/app/modules/SignUp/signup_binding.dart';
 import 'package:project_domestic_violence/app/modules/SignUp/signup_view.dart';
 import 'package:project_domestic_violence/app/modules/Splash/splash_view.dart';
+import 'package:project_domestic_violence/app/modules/StealthMode/calmconner_screen.dart';
 import 'package:project_domestic_violence/app/modules/ViewAfterDelay/callpolice_view.dart';
 import 'package:project_domestic_violence/app/modules/ViewAfterDelay/sharelocation_view.dart';
 import 'package:project_domestic_violence/app/modules/ViewAfterDelay/sos_view.dart';
@@ -76,6 +77,10 @@ class AppPages {
     GetPage(
         name: _Paths.safeplacesview,
         page: () => LocationSafeView(),
+        binding: null),
+    GetPage(
+        name: _Paths.calmconnerScreen,
+        page: () => CalmCornerScreen(),
         binding: null),
   ];
 }

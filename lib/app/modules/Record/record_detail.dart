@@ -121,7 +121,7 @@ class RecordDetail extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              "Sex: ${sex == 1 ? "Male" : "Female"}",
+                              "Sex: ${sex == 1 ? "Male" : sex == 2 ? "Female" : "other"}",
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),

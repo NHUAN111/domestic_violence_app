@@ -13,7 +13,11 @@ class RecordSecondView extends StatefulWidget {
 }
 
 class _RecordSecondViewState extends State<RecordSecondView> {
-  String? _gender = 'Male';
+  // Record
+  TextEditingController nameController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController descController = TextEditingController();
+  int? _gender = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,6 +90,7 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
+                    controller: nameController,
                     decoration: const InputDecoration(
                       hintText: 'Name of the violent person ',
                       border: OutlineInputBorder(
@@ -108,8 +113,8 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Radio<String>(
-                        value: 'Male',
+                      Radio<int>(
+                        value: 1,
                         groupValue: _gender,
                         onChanged: (value) {
                           setState(() {
@@ -121,8 +126,8 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                       SizedBox(
                         width: 20,
                       ),
-                      Radio<String>(
-                        value: 'Female',
+                      Radio<int>(
+                        value: 2,
                         groupValue: _gender,
                         onChanged: (value) {
                           setState(() {
@@ -134,8 +139,8 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                       SizedBox(
                         width: 20,
                       ),
-                      Radio<String>(
-                        value: 'Other',
+                      Radio<int>(
+                        value: 3,
                         groupValue: _gender,
                         onChanged: (value) {
                           setState(() {
@@ -160,6 +165,7 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
+                    controller: addressController,
                     decoration: const InputDecoration(
                       hintText: 'Address the incident occurred ',
                       border: OutlineInputBorder(
@@ -189,6 +195,7 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                   const SizedBox(height: 6),
                   TextFormField(
                     maxLines: 5,
+                    controller: descController,
                     decoration: const InputDecoration(
                       hintText: 'Quick description of the incident ',
                       border: OutlineInputBorder(
@@ -208,15 +215,13 @@ class _RecordSecondViewState extends State<RecordSecondView> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordThirdView(
-                        name: 'nhuan',
-                        address: 'Duy Hai',
-                        desc: 'TEXT DESC',
-                        sex: 1,
+                        name: nameController.text,
+                        address: addressController.text,
+                        desc: descController.text,
+                        sex: _gender!,
                       ),
                     ),
                   );
-
-                  // Get.toNamed(Routes.recordthird);
                 },
                 width: 350,
                 backgroundColor: ColorData.colorSos,

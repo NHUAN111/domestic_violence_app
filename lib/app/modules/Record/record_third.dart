@@ -100,7 +100,6 @@ class _RecordThirdViewState extends State<RecordThirdView> {
         .then((value) => {
               BaseToast.showSuccessToast(
                   "Success", "Record created successfully!")
-              // Get.toNamed(Routes.);
             })
         .catchError((error) {
       BaseToast.showErrorToast("Error", "Failed to create post: $error");
@@ -230,6 +229,7 @@ class _RecordThirdViewState extends State<RecordThirdView> {
                         width: 380,
                         onPress: () {
                           _saveRecord(context);
+                          Get.toNamed(Routes.home);
                         },
                         backgroundColor: ColorData.colorSos,
                         textColor: Colors.white,
